@@ -1,37 +1,70 @@
 const User = require('../models/user');
-const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt'); // Paquete para generar un token único
 
 // Función para registrar un nuevo usuario
 const registerUser = async (req, res) => {
+  try {
+    const { username, email, password, termsAccepted, role, accountActive } = req.body;
+
+    // Verificar si el correo electrónico ya está en uso
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
+    }
+
+    // Crear un token único para el usuario
+    const token = crypto.randomBytes(32).toString('hex'); // Genera un token único de 32 bytes
+
+    // Crear una nueva instancia del modelo User
+    const newUser = new User({
+      username,
+      email,
+      password,
+      termsAccepted,
+      role,
+      accountActive,
+      token // Asignar el token único
+    });
+
+    // Guardar el nuevo usuario en la base de datos
+    await newUser.save();
+
+    // Responder con éxito
+    res.status(201).json({ message: 'Usuario registrado exitosamente', user: newUser });
+  } catch (error) {
+    console.error('Error al registrar el usuario:', error);
+    res.status(500).json({ message: 'Error al registrar el usuario', error });
+  }
+};
+
+// Función para manejar el login de usuarios
+const loginUser = async (req, res) => {
     try {
-      const { username, email, password, termsAccepted, role, accountActive } = req.body;
+      const { email, password } = req.body;
   
-      // Verificar si el correo electrónico ya está en uso
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
+      // Verificar si el usuario existe
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: 'Credenciales incorrectas' });
       }
   
-      // Crear una nueva instancia del modelo User
-      const newUser = new User({
-        username,
-        email,
-        password, // La contraseña será encriptada automáticamente
-        termsAccepted,
-        role,
-        accountActive
-      });
+      // Verificar la contraseña
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Credenciales incorrectas' });
+      }
   
-      // Guardar el nuevo usuario en la base de datos
-      await newUser.save();
+      // Generar el token JWT
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30m' });
   
-      // Responder con éxito
-      res.status(201).json({ message: 'Usuario registrado exitosamente', user: newUser });
+      // Responder con el token
+      res.status(200).json({ message: 'Login exitoso', token });
     } catch (error) {
-      console.error('Error al registrar el usuario:', error);
-      res.status(500).json({ message: 'Error al registrar el usuario', error });
+      console.error('Error al iniciar sesión:', error);
+      res.status(500).json({ message: 'Error al iniciar sesión', error });
     }
-  };
+};
 
 // Función para obtener todos los usuarios
 const getUsers = async (req, res) => {
@@ -97,4 +130,4 @@ const updateUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, getUsers, deleteUser, updateUser };
+module.exports = { registerUser, getUsers, deleteUser, updateUser, loginUser };
