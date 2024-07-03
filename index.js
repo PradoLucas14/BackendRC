@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Importar y usar la ruta de usuarios
+// Importar y usar las rutas de usuarios
 const userRouter = require('./src/routes/user');
 app.use('/api', userRouter);
 
