@@ -8,9 +8,11 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   termsAccepted: { type: Boolean, required: true },
   role: { type: String, required: true },
-  accountActive: { type: Boolean, required: true }
+  accountActive: { type: Boolean, required: true },
+  token: { type: String } // Agregado el campo token
 });
 
+// Middleware para encriptar la contraseña antes de guardar el usuario
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   
