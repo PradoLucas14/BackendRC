@@ -61,4 +61,34 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, getUsers, deleteUser };
+// Función para actualizar un usuario por ID
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, accountActive } = req.body;
+
+    // Verificar que al menos uno de los campos a actualizar esté presente
+    if (username === undefined && accountActive === undefined) {
+      return res.status(400).json({ message: 'Debe proporcionar al menos uno de los campos "username" o "accountActive" para actualizar' });
+    }
+
+    // Buscar y actualizar el usuario por ID
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username, accountActive },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Responder con el usuario actualizado
+    res.status(200).json({ message: 'Usuario actualizado exitosamente', user: updatedUser });
+  } catch (error) {
+    console.error('Error al actualizar el usuario:', error);
+    res.status(500).json({ message: 'Error al actualizar el usuario', error });
+  }
+};
+
+module.exports = { registerUser, getUsers, deleteUser, updateUser };
