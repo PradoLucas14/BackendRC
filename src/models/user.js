@@ -11,19 +11,17 @@ const userSchema = new Schema({
   accountActive: { type: Boolean, required: true }
 });
 
-// Hook para encriptar la contraseña antes de guardar el usuario
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next(); // Solo encriptar si la contraseña ha sido modificada
+  if (!this.isModified('password')) return next();
   
   try {
-    const salt = await bcrypt.genSalt(10); // Generar un "salt"
-    this.password = await bcrypt.hash(this.password, salt); // Encriptar la contraseña
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error);
   }
 });
 
-// Crear y exportar el modelo del usuario
 const User = mongoose.model('User', userSchema);
 module.exports = User;
