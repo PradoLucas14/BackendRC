@@ -9,7 +9,7 @@ const userSchema = new Schema({
   termsAccepted: { type: Boolean, required: true },
   role: { type: String, required: true },
   accountActive: { type: Boolean, required: true },
-  token: { type: String } // Agregado el campo token
+  token: { type: String } 
 });
 
 // Middleware para encriptar la contraseña antes de guardar el usuario
