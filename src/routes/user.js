@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, getUsers, deleteUser, updateUser, loginUser } = require('../controllers/userController');
+const { registerUser, getUsers, deleteUser, updateUser, loginUser, sendVerificationCode, verifyCode } = require('../controllers/userController');
 
 // Ruta para registrar un nuevo usuario
 router.post('/register', registerUser);
@@ -16,5 +16,9 @@ router.patch('/users/:id', updateUser);
 
 // Ruta para login
 router.post('/login', loginUser);
+
+// Rutas para verificación de correo
+router.post('/send-verification-code', sendVerificationCode);
+router.post('/verify-code', verifyCode);
 
 module.exports = router;
