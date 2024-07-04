@@ -42,9 +42,9 @@ const loginUser = async (request, response) => {
     }
 
     // Crear el token JWT
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30m' });
+    const token = jwt.sign({ userId: user._id,userRole: user.role }, process.env.JWT_SECRET, { expiresIn: '30m' });
 
-    response.status(200).json({ message: 'Login exitoso', token });
+    response.status(200).json({ message: 'Login exitoso', accesToken:token });
   } catch (error) {
     response.status(500).json({ message: 'Error al iniciar sesión', error: error.message });
   }
