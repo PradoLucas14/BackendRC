@@ -19,9 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Importar y usar las rutas de usuarios
 const userRouter = require('./src/routes/user');
-const reserveRouter = require('./src/models/reserve');
+
+const reservaRouter = require('./src/routes/reservas');
+
 app.use('/api', userRouter);
-app.use('/api',reserveRouter)
+app.use('/api', reservaRouter)
+
 
 // Conectar a la base de datos y luego iniciar el servidor
 connectDB().then(() => {
