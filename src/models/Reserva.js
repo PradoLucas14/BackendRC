@@ -8,7 +8,7 @@ const reservaSchema = new mongoose.Schema({
         match: /^[a-zA-Z\s]*$/,
     },
     telephone: {
-        type: String,
+        type: Number,
         required: true,
         match: /^\d{7,}$/,
     },
