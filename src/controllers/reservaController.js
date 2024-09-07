@@ -2,28 +2,59 @@ const Reserva = require('../models/Reserva');
 
 // Crear una nueva reserva
 exports.crearReserva = async (req, res) => {
-    const { name, telephone, participants, email, date, hora } = req.body;
+    const { name, telephone, participants, email, date, time } = req.body;
 
-    if (!name || !telephone || !participants || !email || !date || !hora) {
+    // Validaciones
+    if (!name || !telephone || !participants || !email || !date || !time) {
         return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    // Validación del nombre (mínimo 6 caracteres, sin números ni símbolos)
+    const namePattern = /^[a-zA-Z\s]{6,}$/;
+    if (!namePattern.test(name)) {
+        return res.status(400).json({ error: 'El nombre debe tener al menos 6 caracteres y no debe contener números o símbolos.' });
+    }
+
+    // Validación del teléfono (debe ser numérico y tener al menos 7 dígitos)
+    const phonePattern = /^\d{7,}$/;
+    if (!phonePattern.test(telephone)) {
+        return res.status(400).json({ error: 'El teléfono debe ser numérico y tener al menos 7 dígitos.' });
+    }
+
+    // Validación de participantes (debe ser un número mayor a 0)
+    if (typeof participants !== 'number' || participants <= 0) {
+        return res.status(400).json({ error: 'El número de participantes debe ser mayor a 0.' });
+    }
+
+    // Validación de la fecha (debe ser una fecha válida en formato YYYY-MM-DD)
+    if (!Date.parse(date)) {
+        return res.status(400).json({ error: 'La fecha proporcionada no es válida.' });
+    }
+
+    // Validación de la hora (debe estar en formato HH:mm)
+    const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    if (!timePattern.test(time)) {
+        return res.status(400).json({ error: 'La hora debe estar en formato HH:mm.' });
     }
 
     try {
         // Verificar si ya existe una reserva para la misma fecha y hora
-        const reservaExistente = await Reserva.findOne({ date, hora });
+        const reservaExistente = await Reserva.findOne({ date, time });
         if (reservaExistente) {
             return res.status(400).json({ error: 'Ya existe una reserva para la misma fecha y hora' });
         }
 
+        // Crear nueva reserva
         const nuevaReserva = new Reserva({
             name,
             telephone,
             participants,
             email,
             date,
-            hora
+            time
         });
 
+        // Guardar la reserva en la base de datos
         const reservaGuardada = await nuevaReserva.save();
         res.status(201).json(reservaGuardada);
     } catch (error) {

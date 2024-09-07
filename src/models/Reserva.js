@@ -3,30 +3,34 @@ const mongoose = require('mongoose');
 const reservaSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        minlength: 6,
+        match: /^[a-zA-Z\s]*$/,
     },
     telephone: {
-        type: String,
-        required: true
+        type: Number,
+        required: true,
+        match: /^\d{7,}$/,
     },
     participants: {
         type: Number,
-        required: true
+        required: true,
+        min: 1,
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
     date: {
         type: Date,
-        required: true
+        required: true,
     },
-    hora: {
+    time: {
         type: String,
-        required: true
-    }
+        required: true,
+        match: /^([01]\d|2[0-3]):([0-5]\d)$/,
+    },
 });
 
-const Reserva = mongoose.model('Reserva', reservaSchema);
-
-module.exports = Reserva;
+module.exports = mongoose.model('Reserva', reservaSchema);
