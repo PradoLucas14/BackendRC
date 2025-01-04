@@ -101,7 +101,5 @@ module.exports = {
   loginUser,
   getUsers,
   deleteUser,
-  updateUser,
-  sendVerificationCode,
-  verifyCode
+  updateUser
 };

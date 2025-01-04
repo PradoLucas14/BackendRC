@@ -17,8 +17,4 @@ router.patch('/users/:id', updateUser);
 // Ruta para login
 router.post('/login', loginUser);
 
-// Rutas para verificación de correo
-router.post('/send-verification-code', sendVerificationCode);
-router.post('/verify-code', verifyCode);
-
 module.exports = router;
