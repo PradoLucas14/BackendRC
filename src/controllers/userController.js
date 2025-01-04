@@ -1,55 +1,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 require('dotenv').config();
-
-let verificationCodes = {}; // Almacenar códigos de verificación temporalmente
-
-// Enviar código de verificación
-const sendVerificationCode = async (request, response) => {
-  const { email } = request.body;
-  const verificationCode = crypto.randomBytes(3).toString('hex').toUpperCase(); // Código de 6 caracteres
-
-  // Configura nodemailer
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL,
-      pass: process.env.EMAIL_PASSWORD
-    }
-  });
-
-  const mailOptions = {
-    from: process.env.EMAIL,
-    to: email,
-    subject: 'Código de verificación',
-    text: `Tu código de verificación es ${verificationCode}`
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return response.status(500).send('Error enviando el correo');
-    }
-    verificationCodes[email] = verificationCode; // Almacenar el código temporalmente
-    response.status(200).send('Código de verificación enviado');
-  });
-};
-
-// Verificar código de verificación
-const verifyCode = async (request, response) => {
-  const { email, code } = request.body;
-  if (verificationCodes[email] === code) {
-    delete verificationCodes[email]; // Eliminar el código después de la verificación
-    response.status(200).send('Verificación exitosa');
-  } else {
-    response.status(400).send('Código de verificación inválido');
-  }
-};
-
-
-
 
 // Registrar un nuevo usuario
 const registerUser = async (request, response) => {
@@ -85,15 +38,14 @@ const loginUser = async (request, response) => {
     }
 
     // Verificar la contraseña
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compareSync(password, user.password);
     if (!isMatch) {
       return response.status(401).json({ message: 'Contraseña incorrectos' });
     }
 
     // Crear el token JWT
-    const token = jwt.sign({ userId: user._id,userRole: user.role }, process.env.JWT_SECRET, { expiresIn: '30m' });
-
-    response.status(200).json({ message: 'Login exitoso', accesToken:token });
+    const token = jwt.sign({ userId: user._id, userRole: user.role }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    response.status(200).json({ message: 'Login exitoso', accessToken: token });
   } catch (error) {
     response.status(500).json({ message: 'Error al iniciar sesión', error: error.message });
   }
