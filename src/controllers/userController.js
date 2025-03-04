@@ -7,24 +7,49 @@ require('dotenv').config();
 // Registrar un nuevo usuario
 const registerUser = async (request, response) => {
   try {
-    const { username, email, password, termsAccepted, role, accountActive } = request.body;
+    const { username, email, password, termsAccepted } = request.body;
+
+    // Verificar si todos los campos requeridos están presentes
+    if (!username || !email || !password || termsAccepted === undefined) {
+      return response.status(400).json({ message: 'Faltan campos obligatorios' });
+    }
 
     // Verificar si el correo electrónico ya está en uso
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return response.status(400).json({ message: 'El correo electrónico ya está en uso' });
     }
 
-    // Crear un nuevo usuario
-    const newUser = new User({ username, email, password, termsAccepted, role, accountActive });
+    // Verificar si el nombre de usuario ya está en uso
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return response.status(400).json({ message: 'El nombre de usuario ya está en uso' });
+    }
+
+    // Crear un nuevo usuario con un rol por defecto y cuenta activa
+    const newUser = new User({
+      username,
+      email,
+      password,
+      termsAccepted,
+      role: 'cliente',  // Siempre cliente
+      accountActive: true, // Siempre activo
+    });
 
     // Guardar el nuevo usuario en la base de datos
     await newUser.save();
-    response.status(201).json({ message: 'Usuario registrado con éxito', user: { username, email, role, accountActive } });
+
+    response.status(201).json({
+      message: 'Usuario registrado con éxito',
+      user: { username, email, role: 'cliente', accountActive: true },
+    });
+
   } catch (error) {
+    console.error('Error al registrar el usuario:', error); // Log detallado del error
     response.status(500).json({ message: 'Error al registrar el usuario', error: error.message });
   }
 };
+
 
 // Iniciar sesión
 const loginUser = async (request, response) => {
